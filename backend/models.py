@@ -3,6 +3,18 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
 
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    mobile_number = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False)  # Plain text as per requirement
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -46,6 +58,11 @@ class LoanApplication(Base):
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)
     status = Column(String, default="Pending")  # Pending, Approved, Rejected
+    approved_by = Column(Integer, ForeignKey("admins.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    rejection_reason = Column(String, nullable=True)
+    disbursed_amount = Column(Float, nullable=True)
+    repaid_amount = Column(Float, default=0.0)
     
     # Relationship
     user = relationship("User", back_populates="loan_applications")

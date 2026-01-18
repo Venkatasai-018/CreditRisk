@@ -3,6 +3,42 @@ from datetime import datetime
 from typing import Optional, List
 import re
 
+# ============== ADMIN SCHEMAS ==============
+
+class AdminSignupRequest(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=100)
+    email: EmailStr
+    mobile_number: str
+    password: str
+    confirm_password: str
+
+    @validator('confirm_password')
+    def passwords_match(cls, v, values):
+        if 'password' in values and v != values['password']:
+            raise ValueError('Passwords do not match')
+        return v
+
+class AdminLoginRequest(BaseModel):
+    email: str
+    password: str
+
+class AdminResponse(BaseModel):
+    id: int
+    full_name: str
+    email: str
+    mobile_number: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AdminLoginResponse(BaseModel):
+    success: bool
+    message: str
+    admin: AdminResponse
+
+# ============== USER SCHEMAS ==============
+
 class SignupRequest(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
@@ -71,9 +107,21 @@ class LoanApplicationResponse(BaseModel):
     rating: Optional[str]
     status: str
     created_at: datetime
+    approved_by: Optional[int]
+    approved_at: Optional[datetime]
+    rejection_reason: Optional[str]
+    disbursed_amount: Optional[float]
+    repaid_amount: Optional[float]
 
     class Config:
         from_attributes = True
+
+
+class ApprovalRequest(BaseModel):
+    disbursed_amount: Optional[float] = None
+
+class RejectionRequest(BaseModel):
+    rejection_reason: str
 
 
 class PredictionResponse(BaseModel):
